@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #eee;
+}
+
+.overlap {
+    background-color: #ffcccc; /* Rødaktig for overlapp */
+}
+
+@media (max-width: 600px) {
+    table {
+        font-size: 14px;
+    }
+}
