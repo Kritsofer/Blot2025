@@ -18,12 +18,21 @@ th {
     background-color: #eee;
 }
 
-.overlap {
-    background-color: #ffcccc; /* Rødaktig for overlapp */
-}
-
 @media (max-width: 600px) {
     table {
         font-size: 14px;
     }
+}
+
+
+.scene-label {
+    position: absolute;
+    left: 0;
+    width: 100px;
+    background: #f8f8f8;
+    border-right: 1px solid #ccc;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

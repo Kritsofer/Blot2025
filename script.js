@@ -55,78 +55,6 @@ const festivalProgram = {
             "Valhalla": "",
             "Gildehallen": "Painkiller",
             "Helheim": ""
-        },
-        {
-            "tid": "Freda",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "14:45",
-            "Valhalla": "Voluspa",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "16:00",
-            "Valhalla": "",
-            "Gildehallen": "Iskald",
-            "Helheim": ""
-        },
-        {
-            "tid": "16:00",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": "Stage Dolls"
-        },
-        {
-            "tid": "16:45",
-            "Valhalla": "Mio",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "17:30",
-            "Valhalla": "",
-            "Gildehallen": "Sylvaine",
-            "Helheim": "TNT"
-        },
-        {
-            "tid": "18:30",
-            "Valhalla": "Mork",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "19:30",
-            "Valhalla": "",
-            "Gildehallen": "Sigh",
-            "Helheim": "Faun"
-        },
-        {
-            "tid": "20:30",
-            "Valhalla": "Ensiferum",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "21:45",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": "Mayhem"
-        },
-        {
-            "tid": "22:00",
-            "Valhalla": "",
-            "Gildehallen": "Brannos",
-            "Helheim": ""
-        },
-        {
-            "tid": "23:00",
-            "Valhalla": "Folket Bortafor",
-            "Gildehallen": "",
-            "Helheim": ""
         }
     ],
     "Torsdag": [
@@ -182,90 +110,6 @@ const festivalProgram = {
             "tid": "23:00",
             "Valhalla": "",
             "Gildehallen": "Astralseid",
-            "Helheim": ""
-        },
-        {
-            "tid": "Lørda",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "14:30",
-            "Valhalla": "",
-            "Gildehallen": "Congelatio",
-            "Helheim": ""
-        },
-        {
-            "tid": "15:15",
-            "Valhalla": "Folket Bortafor",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "16:00",
-            "Valhalla": "",
-            "Gildehallen": "Plaguebond",
-            "Helheim": "Apocalypse Orchestra"
-        },
-        {
-            "tid": "16:45",
-            "Valhalla": "Svarttjern",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "17:30",
-            "Valhalla": "",
-            "Gildehallen": "Sylvaine",
-            "Helheim": "Sowulo"
-        },
-        {
-            "tid": "17:45",
-            "Valhalla": "",
-            "Gildehallen": "Gudsforlatt",
-            "Helheim": ""
-        },
-        {
-            "tid": "18:30",
-            "Valhalla": "Ruim",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "19:30",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": "Hällas"
-        },
-        {
-            "tid": "19:45",
-            "Valhalla": "",
-            "Gildehallen": "Friggs Døtre",
-            "Helheim": ""
-        },
-        {
-            "tid": "20:30",
-            "Valhalla": "Benediction",
-            "Gildehallen": "",
-            "Helheim": ""
-        },
-        {
-            "tid": "21:30",
-            "Valhalla": "",
-            "Gildehallen": "Runahild",
-            "Helheim": ""
-        },
-        {
-            "tid": "21:40",
-            "Valhalla": "",
-            "Gildehallen": "",
-            "Helheim": "Tsjuder"
-        },
-        {
-            "tid": "23:00",
-            "Valhalla": "Eihwar",
-            "Gildehallen": "",
             "Helheim": ""
         }
     ],
@@ -420,6 +264,7 @@ const festivalProgram = {
 };
 
 const thresholdMinutes = 45; // Overlappgrense
+const defaultDuration = 60; // Estimert konsertvarighet
 
 function renderProgram(day) {
     const tbody = document.querySelector("#program tbody");
@@ -443,10 +288,22 @@ function renderProgram(day) {
 
             if (row[scene]) {
                 const currentTime = parseTime(row.tid);
-                if (lastTimes[scene] && minutesBetween(lastTimes[scene], currentTime) <= thresholdMinutes) {
-                    td.classList.add("overlap");
-                }
-                lastTimes[scene] = currentTime;
+                if (lastTimes[scene]) {
+    // Beregn slutttid for forrige konsert
+    const lastEnd = new Date(lastTimes[scene].getTime() + defaultDuration * 60000);
+
+                    // Hvis denne konserten starter før forrige er ferdig → overlapp
+                    if (currentTime < lastEnd) {
+                        td.classList.add("overlap");
+
+                    // Marker også forrige rad som overlapp
+                            const prevRow = tbody.lastElementChild;
+                                if (prevRow) {
+                                    prevRow.children[scenes.indexOf(scene) + 1].classList.add("overlap");
+                                }
+                            }
+                                        }                                       
+    lastTimes[scene] = currentTime;
             }
             tr.appendChild(td);
         });
@@ -455,6 +312,40 @@ function renderProgram(day) {
     });
 }
 
+//Funksjon for Gantt presentasjon av programmet
+function renderGantt(day) {
+    const container = document.getElementById("gantt");
+    container.innerHTML = "";
+
+    const scenes = ["Valhalla", "Gildehallen", "Helheim"];
+    const concerts = festivalProgram[day];
+    const startOfDay = parseTime("12:00"); // litt før første konsert
+    const endOfDay = parseTime("01:00"); // litt etter siste konsert (natt)
+
+    scenes.forEach(scene => {
+        const row = document.createElement("div");
+        row.classList.add("gantt-row");
+        row.innerHTML = `<span class="scene-label">${scene}</span>`;
+
+        concerts
+            .filter(c => c[scene])
+            .forEach(c => {
+                const start = parseTime(c.tid);
+                const end = new Date(start.getTime() + defaultDuration * 60000);
+                const left = ((start - startOfDay) / (endOfDay - startOfDay)) * 100;
+                const width = ((end - start) / (endOfDay - startOfDay)) * 100;
+
+                const block = document.createElement("div");
+                block.classList.add("gantt-block");
+                block.style.left = left + "%";
+                block.style.width = width + "%";
+                block.textContent = c[scene];
+                row.appendChild(block);
+            });
+
+        container.appendChild(row);
+    });
+}
 // Hjelpefunksjoner
 function parseTime(t) {
     const [h, m] = t.split(":").map(Number);
@@ -477,10 +368,12 @@ function setupDaySelector() {
 
     selector.addEventListener("change", () => {
         renderProgram(selector.value);
+        renderGantt(selectedDay);
     });
 
     // Start med første dag
     renderProgram(Object.keys(festivalProgram)[0]);
+    renderGantt(Object.keys(festivalProgram)[0]);
 }
 
 document.addEventListener("DOMContentLoaded", setupDaySelector);
